@@ -189,15 +189,15 @@ const Footer = () => {
                       href="/contact"
                       className="mb-4 inline-block text-base text-body-color duration-300 hover:text-primary dark:text-body-color-dark dark:hover:text-primary"
                     >
-                      Open Support Ticket
+                      Contact Us
                     </Link>
                   </li>
                   <li>
                     <Link
-                      href="/"
+                      href="/contact"
                       className="mb-4 inline-block text-base text-body-color duration-300 hover:text-primary dark:text-body-color-dark dark:hover:text-primary"
                     >
-                      Contact Us
+                      Subscribe to Newsletter
                     </Link>
                   </li>
                   {/* <li>

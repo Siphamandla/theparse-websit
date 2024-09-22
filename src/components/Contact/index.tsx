@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
-import NewsLatterBox from "./NewsLatterBox";
 import Multiselect from './MultiSelect';
+import NewsLatterBox from "./NewsLatterBox";
 
 const productList = [
   { value: "software_consulting", label: "Software Consulting" },
@@ -13,33 +13,84 @@ const productList = [
   { value: "ecommerce", label: "eCommerce Platform" }
 ];
 
+interface Errors {
+  name?: string;
+  email?: string;
+  message?: string;
+  products?: string;
+}
+
 const Contact = () => {
   // State for form inputs
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [products, setProducts] = useState<any[]>([]);
+  const [formStatus, setFormStatus] = useState('');
+  const [loading, setLoading] = useState(false); // Loading state for the button
+  const [errors, setErrors] = useState<Errors>({});// State to handle validation errors
 
-  // Handle form submission
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  // Basic form validation
+  const validateForm = () => {
+    const newErrors: any = {};
+    if (!name.trim()) newErrors.name = "Name is required";
+    if (!email.trim()) newErrors.email = "Email is required";
+    if (!message.trim()) newErrors.message = "Message is required";
+    if (products.length === 0) newErrors.products = "Please select at least one service";
 
-    // Construct the form data
-    const formData = {
-      name,
-      email,
-      message,
-      products,
-    };
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-    // Example: Send formData to API (replace with actual API call)
-    console.log("Form submitted with data: ", formData);
-
-    // Optionally, clear the form fields after submission
+  const clearfields = () => {
     setName('');
     setEmail('');
     setMessage('');
     setProducts([]);
+  }
+
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    // Validate form inputs before submission
+    if (!validateForm()) {
+      return;
+    }
+  
+    setLoading(true); // Start the loading spinner
+    const formData = { name, email, message, products };
+  
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+  
+      const result = await res.json(); // Parse JSON response
+  
+      if (res.status === 400) {
+        // Handle duplicate email error
+        setFormStatus('Thank you! We’ve already received your inquiry, and our team will be in touch with you.');
+        clearfields();
+      } else if (res.ok) {
+        // Handle successful form submission
+        setFormStatus('Form submitted successfully!');
+        // Optionally, clear the form fields
+        clearfields();
+      } else {
+        // Handle other types of errors (like 500 server errors)
+        setFormStatus('Error submitting form. Please try again later.');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setFormStatus('Error submitting form. Please check your network connection.');
+    } finally {
+      setLoading(false); // Stop the loading spinner
+    }
   };
 
   return (
@@ -76,6 +127,7 @@ const Contact = () => {
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                       />
+                      {errors.name && <p className="text-red-600 text-sm">{errors.name}</p>}
                     </div>
                   </div>
                   <div className="w-full px-4 md:w-1/2">
@@ -93,6 +145,7 @@ const Contact = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                       />
+                      {errors.email && <p className="text-red-600 text-sm">{errors.email}</p>}
                     </div>
                   </div>
                   <div className="w-full px-4 mb-4">
@@ -111,6 +164,7 @@ const Contact = () => {
                         selected={products}
                         setSelected={setProducts}
                       />
+                      {errors.products && <p className="text-red-600 text-sm">{errors.products}</p>}
                     </div>
                   </div>
                   <div className="w-full px-4">
@@ -129,15 +183,44 @@ const Contact = () => {
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                       ></textarea>
+                      {errors.message && <p className="text-red-600 text-sm">{errors.message}</p>}
                     </div>
                   </div>
                   <div className="w-full px-4">
                     <button
                       type="submit"
-                      className="rounded-sm bg-primary px-9 py-4 text-base font-medium text-white shadow-submit duration-300 hover:bg-primary/90 dark:shadow-submit-dark"
+                      className={`rounded-sm bg-primary px-9 py-4 text-base font-medium text-white shadow-submit duration-300 hover:bg-primary/90 dark:shadow-submit-dark ${
+                        loading ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                      disabled={loading}
                     >
-                      Submit Request
+                      {loading ? (
+                        <svg
+                          className="animate-spin h-5 w-5 text-white inline-block"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v8H4z"
+                          ></path>
+                        </svg>
+                      ) : (
+                        'Submit Request'
+                      )}
                     </button>
+                    {/* Display form submission status */}
+                    {formStatus && <p className="mt-4 text-sm text-green-600">{formStatus}</p>}
                   </div>
                 </div>
               </form>
