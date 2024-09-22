@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import Breadcrumb from "@/components/Common/Breadcrumb";
-import { Metadata } from "next";
 
 // Accordion component
 const AccordionItem = ({ title, children }) => {
