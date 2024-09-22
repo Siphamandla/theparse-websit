@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb'; // Import the MongoDB client promise
+import sendEmail from "@/lib/sendgrid"; // Ensure named export is correct
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email } = body; // Extract email from the request body
+    const { email, name } = body; // Destructure both email and name from the request body
 
     const client = await clientPromise;  // Await the MongoDB client connection
     const db = client.db('theParse');
@@ -20,6 +21,18 @@ export async function POST(request: Request) {
 
     // Insert form data into MongoDB if no duplicate email is found
     const result = await collection.insertOne(body);
+
+    // Send confirmation email after adding the user
+    await sendEmail({
+      to: email,
+      cc: "",
+      bcc: process.env.THEPARSE_CONTACTUS_BCC || "", // Ensure BCC is available
+      dynamicTemplateData: {
+        name: name,
+        email: email,
+      },
+      templateId: process.env.THEPARSE_CONTACTUS_TEMPLATE_ID, // Ensure Template ID is set
+    });
 
     // Return a success response
     return NextResponse.json({ message: 'Form submitted successfully', result });
