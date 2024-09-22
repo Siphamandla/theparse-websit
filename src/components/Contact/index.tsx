@@ -157,12 +157,13 @@ const Contact = () => {
                     </label>
                     <div className="form-group">
                       <Multiselect
-                        name="newCustomer_products"
-                        className="form-control"
                         required
                         options={productList}
                         selected={products}
                         setSelected={setProducts}
+                        labelname=""    // Add the labelname prop
+                        Iwidth="100%"                  // Add the Iwidth prop
+                        placeholder="Choose services" 
                       />
                       {errors.products && <p className="text-red-600 text-sm">{errors.products}</p>}
                     </div>

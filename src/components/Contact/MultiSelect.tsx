@@ -10,7 +10,7 @@ interface Option {
 interface MultiselectProps {
   name?: string;
   className?: string;
-  required?: boolean;
+  required?: boolean; // Add `required` to the props interface
   options: Option[];
   selected: Option[];
   setSelected: React.Dispatch<React.SetStateAction<Option[]>>;
@@ -28,6 +28,7 @@ const Multiselect: React.FC<MultiselectProps> = ({
   Iwidth,
   placeholder,
   className,
+  required, // Add `required` here
 }) => {
   const onChange = (selectedOptions: Option[] | null) => {
     setSelected(selectedOptions || []); // Handle null case for clearing options
@@ -45,7 +46,7 @@ const Multiselect: React.FC<MultiselectProps> = ({
       {/* Render the label above the Select component */}
       {labelname && (
         <label htmlFor={name} className="text-sm font-medium text-dark dark:text-white">
-          {labelname}
+          {labelname} {required && <span className="text-red-500">*</span>}
         </label>
       )}
       <Select
