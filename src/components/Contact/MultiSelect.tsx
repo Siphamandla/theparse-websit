@@ -2,27 +2,57 @@ import React from "react";
 import Select from "react-select";
 import { ClearIndicator } from "./ClearIndicator";
 
-const Multiselect = ({ selected, setSelected, options, labelname, Iwidth, placeholder }) => {
-  const onChange = (selectedOptions) => {
-    setSelected(selectedOptions);
+interface Option {
+  value: string;
+  label: string;
+}
+
+interface MultiselectProps {
+  name?: string;
+  className?: string;
+  required?: boolean;
+  options: Option[];
+  selected: Option[];
+  setSelected: React.Dispatch<React.SetStateAction<Option[]>>;
+  labelname: string;
+  Iwidth: string;
+  placeholder: string;
+}
+
+const Multiselect: React.FC<MultiselectProps> = ({
+  name,
+  selected,
+  setSelected,
+  options,
+  labelname,
+  Iwidth,
+  placeholder,
+  className,
+}) => {
+  const onChange = (selectedOptions: Option[] | null) => {
+    setSelected(selectedOptions || []); // Handle null case for clearing options
   };
 
   // Custom styles for react-select components
   const customStyles = {
     indicatorSeparator: () => ({
-      display: 'none',
+      display: "none",
     }),
   };
 
   return (
-    <div style={{ width: Iwidth }}>
+    <div className={className} style={{ width: Iwidth }}>
       {/* Render the label above the Select component */}
-      {labelname && <label className="text-sm font-medium text-dark">{labelname}</label>}
+      {labelname && (
+        <label htmlFor={name} className="text-sm font-medium text-dark dark:text-white">
+          {labelname}
+        </label>
+      )}
       <Select
         isMulti
+        name={name}
         isClearable={true}
         components={{ ClearIndicator }}
-        defaultValue={selected}
         value={selected}
         styles={customStyles}
         onChange={onChange}
